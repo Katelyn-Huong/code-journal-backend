@@ -6,7 +6,7 @@ import {
   readEntry,
   removeEntry,
   updateEntry,
-} from '../data';
+} from '../../data';
 
 /**
  * Form that adds or edits an entry.
@@ -28,7 +28,9 @@ export function EntryForm() {
     async function load(id: number) {
       setIsLoading(true);
       try {
-        const entry = await readEntry(id);
+        const response = await fetch(`/api/entries/${entryId}`);
+        if (!response.ok) throw new Error(`Response status ${response.status}`);
+        const entry = (await response.json()) as Entry;
         if (!entry) throw new Error(`Entry with ID ${id} not found`);
         setEntry(entry);
         setPhotoUrl(entry.photoUrl);
@@ -39,7 +41,7 @@ export function EntryForm() {
       }
     }
     if (isEditing) load(+entryId);
-  }, [entryId]);
+  }, [entryId, isEditing]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
