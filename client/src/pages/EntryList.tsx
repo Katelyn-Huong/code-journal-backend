@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPencilAlt } from 'react-icons/fa';
-import { Entry, readEntries } from '../data';
+import { Entry } from '../data';
 
 export function EntryList() {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -11,7 +11,9 @@ export function EntryList() {
   useEffect(() => {
     async function load() {
       try {
-        const entries = await readEntries();
+        const response = await fetch('/api/entries');
+        if (!response.ok) throw new Error(`Response status ${response.status}`);
+        const entries = (await response.json()) as Entry[];
         setEntries(entries);
       } catch (err) {
         setError(err);

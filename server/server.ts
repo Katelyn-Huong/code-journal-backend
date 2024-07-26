@@ -105,6 +105,24 @@ app.put('/api/entries/:entryId', async (req, res, next) => {
   }
 });
 
+app.delete('/api/entries/:entryId', async (req, res, next) => {
+  try {
+    const { entryId } = req.params;
+    const sql = `
+      delete from "entries"
+        where "entryId" = $1
+        returning *;
+    `;
+    const params = [entryId];
+    const result = await db.query<Entry>(sql, params);
+    const [entry] = result.rows;
+    if (!entry) throw new ClientError(404, 'failed to delete entry');
+    res.json(entry);
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use(errorMiddleware);
 
 app.listen(process.env.PORT, () => {
