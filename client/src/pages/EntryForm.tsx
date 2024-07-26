@@ -43,21 +43,35 @@ export function EntryForm() {
     if (isEditing) load(+entryId);
   }, [entryId, isEditing]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const newEntry = Object.fromEntries(formData) as unknown as Entry;
     if (isEditing) {
-      updateEntry({ ...entry, ...newEntry });
-    } else {
-      addEntry(newEntry);
+      const response = await fetch(`/api/entries/${entryId}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(newEntry)
+      });
+      if (!response.ok) throw new Error(`Response status: ${response.status}`);
+      } else {
+      const response = await fetch('/api/entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEntry),
+      });
+      if (!response.ok) throw new Error(`Response status: ${response.status}`);
     }
     navigate('/');
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!entry?.entryId) throw new Error('Should never happen');
     removeEntry(entry.entryId);
+    const response = await fetch(`/api/entries/${entryId}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error(`Response status: ${response.status}`);
     navigate('/');
   }
 
